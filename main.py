@@ -20,70 +20,17 @@ def print_options():
     print('[S]ALIR')
 
 
-def check_contact_data(message, data_name):
+def check_contact_data(message, data_name, force = True):
     print(message)
     input_data = input()
+    if not force and not input_data:
+        return
     try:
         getattr(validator, f'validate{data_name.capitalize()}')(input_data)
         return input_data
     except ValueError as err:
         print(err)
         check_contact_data(message, data_name)
-
-
-def check_name():
-    print('Inserta el nombre:')
-    name = input()
-    try:
-        validator.validateName(name)
-        return name
-    except ValueError as err:
-        print(err)
-        check_name()
-
-
-def check_surname():
-    print('Inserta los apellidos:')
-    surname = input()
-    try:
-        validator.validateSurname(surname)
-        return surname
-    except ValueError as err:
-        print(err)
-        check_surname()
-
-
-def check_email():
-    print('Inserta el email:')
-    email = input()
-    try:
-        validator.validateEmail(email)
-        return email
-    except ValueError as err:
-        print(err)
-        check_email()
-
-
-def check_phone():
-    print('Inserta el teléfono (9 cifras sin guiones ni puntos):')
-    phone = input()
-    try:
-        validator.validatePhone(phone)
-        return phone
-    except ValueError as err:
-        print(err)
-        check_phone()
-
-
-def check_birthday():
-    print('Inserta la fecha de nacimiento (YYYY-MM-DD):')
-    birthday = input()
-    try:
-        validator.validateBirthday(birthday)
-        return birthday
-    except ValueError as err:
-        print(err)
-        check_birthday()
 
 
 def create_contact():
@@ -109,6 +56,86 @@ def list_contacts():
     if not list_contacts:
         return print('Todavía no hay contactos guardados')
 
+    _print_table_contacts(list_contacts)
+
+
+def search_contact():
+
+    filters = {}
+    print('Introduce un nombre (vacío para usar otro filtro):')
+    nombre = input()
+    if nombre:
+        filters['NAME'] = nombre
+    print('Introduce un apellido (vacío para usar otro filtro):')
+    apellidos = input()
+    if apellidos:
+        filters['SURNAME'] = apellidos
+    print('Introduce un email (vacío para usar otro filtro):')
+    email = input()
+    if email:
+        filters['EMAIL'] = email
+
+    try:
+        list_contacts = db.search_contacts(filters)
+        if not list_contacts:
+            return print('No hay ningún contacto con esos criterios de búsqueda')
+
+        _print_table_contacts(list_contacts)
+    except ValueError as err:
+        print(err)
+        time.sleep(1)
+        search_contact()
+
+
+def update_contact():
+
+    list_contacts()
+
+    print('Introduce el id del contacto que quieres actualizar:')
+    id_object = input()
+
+    data = {}
+    nombre = check_contact_data('Introduce un nombre (vacío para mantener el nombre actual):', 'name', False)
+    if nombre:
+        data['NAME'] = nombre
+    apellidos = check_contact_data('Introduce un apellido (vacío para mantener los apellidos actuales):', 'surname', False)
+    if apellidos:
+        data['SURNAME'] = apellidos
+    email = check_contact_data('Introduce un email (vacío para mantener el email actual):', 'email', False)
+    if email:
+        data['EMAIL'] = email
+    phone = check_contact_data('Introduce un teléfono (vacío para mantener el teléfono actual):', 'phone', False)
+    if phone:
+        data['PHONE'] = phone
+    birthday = check_contact_data('Introduce una fecha de nacimiento YYYY-MM-DD (vacío para mantener la fecha actual):', 'birthday', False)
+    if birthday:
+        data['BIRTHDAY'] = birthday
+    
+    try:
+        res = db.update(id_object, data)
+        if res:
+            print('Contacto actualizado con éxito')
+    except Exception as err:
+        print(err)
+        time.sleep(1)
+        update_contact()
+
+def delete_contact():
+    list_contacts()
+
+    print('Introduce el id del contacto que quieres eliminar:')
+    id_object = input()
+    try:
+        res = db.delete(id_object)
+        if res:
+            print('Contacto eliminado con éxito')
+    except Exception as err:
+        print(err)
+        time.sleep(1)
+        delete_contact()
+    
+
+def _print_table_contacts(list_contacts):
     table = PrettyTable(db.get_schema().keys())
     for contact in list_contacts:
         table.add_row([
@@ -121,7 +148,7 @@ def list_contacts():
         ])
 
     print(table)
-    print('Pulsa cualquier letra para salir')
+    print('Pulsa cualquier letra para continuar')
     command = input()
 
 def run():
@@ -135,11 +162,11 @@ def run():
     elif command == 'L':
         list_contacts()
     elif command == 'M':
-        pass
+        update_contact()
     elif command == 'E':
-        pass
+        delete_contact()
     elif command == 'B':
-        pass
+        search_contact()
     elif command == 'S':
         os._exit(1)
     else:

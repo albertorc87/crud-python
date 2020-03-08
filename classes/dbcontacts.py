@@ -38,16 +38,38 @@ class DBContacts(DBbyCSV):
         return self.insert(data)
     
 
-    def update_contact(self):
-        pass
+    def update_contact(self, id_object, data):
+        if not id_object:
+            raise ValueError('Debes envíar el id del contacto')
+        if not data:
+            raise ValueError('Debes envíar al menos un parámetro a actualizar')
+        self.update(id_object, data)
 
 
-    def delete_contact(self):
-        pass
+    def delete_contact(self, id_object):
+        if not id_object:
+            raise ValueError('Debes envíar el id del contacto')
+        self.delete(id_object)
 
 
     def list_contacts(self):
         list_contacts = self.get_all()
+        return self._create_object_contacts(list_contacts)
+
+    
+    def get_schema(self):
+        return SCHEMA
+
+
+    def search_contacts(self, filters):
+        if 'NAME' not in filters and 'SURNAME' not in filters and 'EMAIL' not in filters:
+            raise ValueError('Debes envíar al menos un filtro')
+
+        list_contacts = self.get_by_filters(filters)
+        return self._create_object_contacts(list_contacts)
+
+
+    def _create_object_contacts(self, list_contacts):
 
         if not list_contacts:
             return None
@@ -59,7 +81,3 @@ class DBContacts(DBbyCSV):
             object_contacts.append(c)
 
         return object_contacts
-
-    
-    def get_schema(self):
-        return SCHEMA
