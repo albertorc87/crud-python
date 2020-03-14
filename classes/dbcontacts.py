@@ -1,40 +1,47 @@
 from .contact import Contact
-from .dbcsv import DBbyCSV
+# from .dbcsv import DBbyCSV
+from .dbpostgresql import DBPostgresql
 
 SCHEMA = {
-    'ID': {
+    'id': {
         'type': 'autoincrement',
     }, 
-    'NAME': {
+    'name': {
         'type': 'string',
         'min_length': 3,
         'max_length': 50
     }, 
-    'SURNAME': {
+    'surname': {
         'type': 'string',
         'min_length': 5,
         'max_length': 100
     }, 
-    'EMAIL': {
+    'email': {
         'type': 'string',
         'max_length': 254
     }, 
-    'PHONE': {
+    'phone': {
         'type': 'int'
     }, 
-    'BIRTHDAY': {
+    'birthday': {
         'type': 'date'
     }
 }
 
-class DBContacts(DBbyCSV):
+class DBContacts(DBPostgresql):
 
     def __init__(self):
         super().__init__(SCHEMA, 'contacts')
 
     
     def save_contact(self, contact):
-        data = [contact.name, contact.surname, contact.email, contact.phone, contact.birthday]
+        data = {
+            'name':contact.name, 
+            'surname':contact.surname, 
+            'email':contact.email, 
+            'phone':contact.phone, 
+            'birthday':contact.birthday
+        }
         return self.insert(data)
     
 
@@ -62,7 +69,7 @@ class DBContacts(DBbyCSV):
 
 
     def search_contacts(self, filters):
-        if 'NAME' not in filters and 'SURNAME' not in filters and 'EMAIL' not in filters:
+        if not filters:
             raise ValueError('Debes envíar al menos un filtro')
 
         list_contacts = self.get_by_filters(filters)
@@ -77,7 +84,7 @@ class DBContacts(DBbyCSV):
         object_contacts = []
         # Convertimos los datos a objectos de tipo contact
         for contact in list_contacts:
-            c = Contact(contact['ID'], contact['NAME'], contact['SURNAME'], contact['EMAIL'], contact['PHONE'], contact['BIRTHDAY'])
+            c = Contact(contact['id'], contact['name'], contact['surname'], contact['email'], contact['phone'], contact['birthday'])
             object_contacts.append(c)
 
         return object_contacts
