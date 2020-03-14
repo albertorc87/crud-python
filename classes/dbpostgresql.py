@@ -54,6 +54,14 @@ class DBPostgresql:
         self._launch_query(query)
 
 
+    def _launch_query(self, query):
+        print(query)
+        self._cur.execute(query)
+        matches = re.search(r"^SELECT", query, re.IGNORECASE)
+        if not matches:
+            self._connect.commit()
+
+
     def insert(self, data):
 
         values = "'" + "', '".join(data.values()) + "'"
@@ -62,41 +70,6 @@ class DBPostgresql:
         self._launch_query(query)
 
         return True
-
-
-    def get_all(self):
-        return self.get_by_filters()
-
-
-    def get_by_filters(self, filters=None):
-
-        list_filters = []
-
-        where = '1=1'
-        if filters is not None:
-            for field_name, field_value in filters.items():
-                list_filters.append(f"{field_name} LIKE '%{field_value}%'")
-
-                where = " AND ".join(list_filters)
-
-        query = f'SELECT * FROM public.{self._table_name} WHERE {where};'
-
-        table_keys = []
-        for schema_key in self._schema.keys():
-            table_keys.append(schema_key)
-
-        list_data = []
-        self._launch_query(query)
-        rows = self._cur.fetchall()
-
-        for row in rows:
-            data = {}
-            for key, value in enumerate(row):
-                data[table_keys[key]] = value
-
-            list_data.append(data)
-
-        return list_data
 
 
     def delete(self, id_object):
@@ -131,9 +104,37 @@ class DBPostgresql:
 
         return data
 
-    def _launch_query(self, query):
-        print(query)
-        self._cur.execute(query)
-        matches = re.search(r"^SELECT", query, re.IGNORECASE)
-        if not matches:
-            self._connect.commit()
+
+    def get_by_filters(self, filters=None):
+
+        list_filters = []
+
+        where = '1=1'
+        if filters is not None:
+            for field_name, field_value in filters.items():
+                list_filters.append(f"{field_name} LIKE '%{field_value}%'")
+
+                where = " AND ".join(list_filters)
+
+        query = f'SELECT * FROM public.{self._table_name} WHERE {where};'
+
+        table_keys = []
+        for schema_key in self._schema.keys():
+            table_keys.append(schema_key)
+
+        list_data = []
+        self._launch_query(query)
+        rows = self._cur.fetchall()
+
+        for row in rows:
+            data = {}
+            for key, value in enumerate(row):
+                data[table_keys[key]] = value
+
+            list_data.append(data)
+
+        return list_data
+
+
+    def get_all(self):
+        return self.get_by_filters()

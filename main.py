@@ -6,7 +6,6 @@ from classes.dbcontacts import DBContacts
 from prettytable import PrettyTable
 validator = Validations()
 db = DBContacts()
-from classes.dbpostgresql import DBPostgresql
 
 def print_options():
     print('AGENDA DE CONTACTOS')
@@ -152,15 +151,6 @@ def _print_table_contacts(list_contacts):
     command = input()
 
 def run():
-
-    # data = {
-    #     'name':'Peter', 
-    #     'surname':'Paulin', 
-    #     'email':'peter@cosas.com', 
-    #     'phone':'999929999', 
-    #     'birthday':'1977-01-21'
-    # }
-    # return db.insert(data)
 
     print_options()
 
