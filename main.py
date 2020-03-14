@@ -64,15 +64,15 @@ def search_contact():
     print('Introduce un nombre (vacío para usar otro filtro):')
     nombre = input()
     if nombre:
-        filters['NAME'] = nombre
+        filters['name'] = nombre
     print('Introduce un apellido (vacío para usar otro filtro):')
     apellidos = input()
     if apellidos:
-        filters['SURNAME'] = apellidos
+        filters['surname'] = apellidos
     print('Introduce un email (vacío para usar otro filtro):')
     email = input()
     if email:
-        filters['EMAIL'] = email
+        filters['email'] = email
 
     try:
         list_contacts = db.search_contacts(filters)
