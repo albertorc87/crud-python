@@ -1,5 +1,4 @@
 import os
-print(os.getcwd())
 
 import time
 from classes.validations import Validations

@@ -1,8 +1,7 @@
-import os
 import unittest
 from classes.contact import Contact
 from classes.dbcontacts import DBContacts
-import psycopg2
+
 
 class TestDBContacts(unittest.TestCase):
     
@@ -33,7 +32,6 @@ class TestDBContacts(unittest.TestCase):
     def test_update_contact(self):
         
         contact = self._dict_contact()
-
         last_id = self.db.get_last_id()
 
         result = self.db.update_contact(last_id, contact)
@@ -50,11 +48,7 @@ class TestDBContacts(unittest.TestCase):
 
     def test_get_contact(self):
         
-        try:
-            last_id = self.db.get_last_id()
-        except psycopg2.ProgrammingError as err:
-            self.db.save_contact(self._object_contact())
-            last_id = self.db.get_last_id()
+        last_id = self.db.get_last_id()
 
         contact = self.db.get_by_id(last_id)
         self.assertNotEqual(contact, {})
@@ -101,11 +95,7 @@ class TestDBContacts(unittest.TestCase):
 
     def test_remove_contact(self):
 
-        try:
-            last_id = self.db.get_last_id()
-        except Exception as err:
-            self.db.save_contact(self._object_contact())
-            last_id = self.db.get_last_id()
+        last_id = self.db.get_last_id()
 
         self.assertEqual(self.db.delete_contact(last_id), 1)
         contact = self.db.get_by_id(last_id)

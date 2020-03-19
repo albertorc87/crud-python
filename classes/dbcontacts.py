@@ -56,7 +56,7 @@ class DBContacts(DBPostgresql):
 
     def delete_contact(self, id_object):
         if not id_object:
-            raise ValueError('Debes envíar el id del contacto')
+            raise ValueError('Debes enviar el id del contacto')
         return self.delete(id_object)
 
 
@@ -71,7 +71,7 @@ class DBContacts(DBPostgresql):
 
     def search_contacts(self, filters):
         if not filters:
-            raise ValueError('Debes envíar al menos un filtro')
+            raise ValueError('Debes enviar al menos un filtro')
 
         list_contacts = self.get_by_filters(filters)
         return self._create_object_contacts(list_contacts)

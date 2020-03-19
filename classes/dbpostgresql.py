@@ -19,7 +19,7 @@ class DBPostgresql:
         
         self._cur = self._connect.cursor()
         self._launch_query('SELECT 1')
-        print('Conexión establecida con éxito')
+        # print('Conexión establecida con éxito')
             
         self._create_table()
 
@@ -56,7 +56,7 @@ class DBPostgresql:
 
 
     def _launch_query(self, query):
-        print(query)
+        # print(query)
         self._cur.execute(query)
         matches = re.search(r"^SELECT", query, re.IGNORECASE)
         affected = self._cur.rowcount
