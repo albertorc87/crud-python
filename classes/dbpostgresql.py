@@ -4,9 +4,10 @@ from environs import Env
 
 class DBPostgresql:
 
-    def __init__(self, schema, table_name):
+    def __init__(self, schema, table_name, is_test):
         self._table_name = table_name
         self._schema = schema
+        self._is_test = is_test
         env = Env()
         env.read_env()
         self._connect = psycopg2.connect(
@@ -15,7 +16,7 @@ class DBPostgresql:
             user=env('POSTGRES_USER'), 
             password=env('POSTGRES_PASSWORD')
         )
-
+        
         self._cur = self._connect.cursor()
         self._launch_query('SELECT 1')
         print('Conexión establecida con éxito')
@@ -58,24 +59,25 @@ class DBPostgresql:
         print(query)
         self._cur.execute(query)
         matches = re.search(r"^SELECT", query, re.IGNORECASE)
-        if not matches:
+        affected = self._cur.rowcount
+        if not matches and not self._is_test:
             self._connect.commit()
+
+        return affected
 
 
     def insert(self, data):
 
         values = "'" + "', '".join(data.values()) + "'"
-        query = f'INSERT INTO public.{self._table_name} ({", ".join(data.keys())}) VALUES ({values});'
+        query = f'INSERT INTO public.{self._table_name} ({", ".join(data.keys())}) VALUES ({values}) RETURNING id;'
 
-        self._launch_query(query)
-
-        return True
+        return self._launch_query(query)
 
 
     def delete(self, id_object):
         query = f'DELETE FROM public.{self._table_name} WHERE id = {id_object};'
 
-        self._launch_query(query)
+        return self._launch_query(query)
 
 
     def update(self, id_object, data):
@@ -86,7 +88,7 @@ class DBPostgresql:
         
 
         query = f'UPDATE public.{self._table_name} SET {", ".join(list_update)} WHERE id = {id_object};'
-        self._launch_query(query)
+        return self._launch_query(query)
 
 
     def get_by_id(self, id_object):
@@ -99,8 +101,9 @@ class DBPostgresql:
         data = {}
         self._launch_query(query)
         row = self._cur.fetchone()
-        for key, value in enumerate(row):
-            data[table_keys[key]] = value
+        if row:
+            for key, value in enumerate(row):
+                data[table_keys[key]] = value
 
         return data
 
@@ -138,3 +141,11 @@ class DBPostgresql:
 
     def get_all(self):
         return self.get_by_filters()
+
+
+    def query(self, query):
+        return _launch_query(query)
+
+
+    def get_last_id(self):
+        return self._cur.fetchone()[0]
