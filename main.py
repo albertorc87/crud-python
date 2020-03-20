@@ -1,4 +1,5 @@
 import os
+
 import time
 from classes.validations import Validations
 from classes.contact import Contact

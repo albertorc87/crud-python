@@ -30,8 +30,9 @@ SCHEMA = {
 
 class DBContacts(DBPostgresql):
 
-    def __init__(self):
-        super().__init__(SCHEMA, 'contacts')
+    def __init__(self, is_test=False):
+        table_name = 'contacts'
+        super().__init__(SCHEMA, table_name, is_test)
 
     
     def save_contact(self, contact):
@@ -47,16 +48,16 @@ class DBContacts(DBPostgresql):
 
     def update_contact(self, id_object, data):
         if not id_object:
-            raise ValueError('Debes envíar el id del contacto')
+            raise ValueError('Debes enviar el id del contacto')
         if not data:
-            raise ValueError('Debes envíar al menos un parámetro a actualizar')
-        self.update(id_object, data)
+            raise ValueError('Debes enviar al menos un parámetro a actualizar')
+        return self.update(id_object, data)
 
 
     def delete_contact(self, id_object):
         if not id_object:
-            raise ValueError('Debes envíar el id del contacto')
-        self.delete(id_object)
+            raise ValueError('Debes enviar el id del contacto')
+        return self.delete(id_object)
 
 
     def list_contacts(self):
@@ -70,7 +71,7 @@ class DBContacts(DBPostgresql):
 
     def search_contacts(self, filters):
         if not filters:
-            raise ValueError('Debes envíar al menos un filtro')
+            raise ValueError('Debes enviar al menos un filtro')
 
         list_contacts = self.get_by_filters(filters)
         return self._create_object_contacts(list_contacts)
