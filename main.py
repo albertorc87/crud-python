@@ -21,16 +21,19 @@ def print_options():
 
 
 def check_contact_data(message, data_name, force = True):
-    print(message)
-    input_data = input()
-    if not force and not input_data:
-        return
-    try:
-        getattr(validator, f'validate{data_name.capitalize()}')(input_data)
-        return input_data
-    except ValueError as err:
-        print(err)
-        return check_contact_data(message, data_name, force)
+    while True:
+        print(message)
+        input_data = input()
+        
+        if not force and not input_data:
+            return 
+            
+        try:
+            getattr(validator, f"validate{data_name.capitalize()}")(input_data)
+            return input_data
+        except ValueError as err:
+            print(err)
+            continue
 
 
 def create_contact():
